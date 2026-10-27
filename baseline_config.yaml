@@ -1,0 +1,61 @@
+# BDD: source-only nnU-Net v2 baseline
+# Project-level experiment specification; nnU-Net v2 does NOT read this YAML directly.
+project:
+  name: bdd_runmc_source_only_baseline
+  framework: nnunetv2
+  purpose: source_only_cross_site_prostate_segmentation
+
+dataset:
+  dataset_id: 101  
+  source_site: A
+  source_name: RUNMC
+  source_patients: 30
+  modality: T2_weighted_MRI
+  input_channels: 1
+  segmentation_target: whole_prostate
+  labels:
+    background: 0
+    prostate: 1
+  # Harmonize RUNMC original labels: CG=1, PZ=2 -> prostate=1.
+  # Confirm whether any other prostate regions require inclusion.
+
+model:
+  configuration: 2d
+  trainer: nnUNetTrainer
+  plans_identifier: nnUNetPlans
+  architecture: automatic
+  patch_size: automatic
+  target_spacing: automatic
+  batch_size: automatic
+  normalization: automatic
+
+training:
+  optimizer: nnunetv2_default
+  learning_rate_schedule: nnunetv2_default
+  loss: nnunetv2_default
+  data_augmentation: nnunetv2_default
+  epochs: 1000  # standard nnUNetTrainer; verify installed version
+  mixed_precision: nnunetv2_default
+  seed: 42  # reproducibility target; requires implementation to set seed
+
+validation:
+  method: patient_level_k_fold
+  folds: 5
+  fold_ids: [0, 1, 2, 3, 4]
+  nested_cross_validation: false
+  # Preserve patient grouping; save the actual split definitions.
+
+external_evaluation:
+  sites: [B, C, D, E, F]
+  blind_test: true
+  ensemble: five_fold_probability_averaging
+  model_selection_from_target_sites: false
+  postprocessing: nnunetv2_default_selected_on_source_validation_only
+  metrics: [dice, hd95]
+
+reproducibility:
+  save_splits: true
+  save_generated_plans: true
+  save_dataset_fingerprint: true
+  record_nnunet_version: true
+  record_environment: true

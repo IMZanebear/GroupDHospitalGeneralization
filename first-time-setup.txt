@@ -1,0 +1,15 @@
+# Install Python virtual environment support
+sudo apt update
+sudo apt install -y python3-venv python3-pip
+
+# Create the virtual environment
+python3 -m venv .venv
+
+# Activate it
+source .venv/bin/activate
+
+# Upgrade pip
+python -m pip install --upgrade pip
+
+# Install project dependencies
+python -m pip install -r requirements.txt
